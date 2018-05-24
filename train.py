@@ -48,6 +48,7 @@ with tf.Session() as sess:
     # setup tensorboard
     tf.summary.scalar('step', global_step)
     tf.summary.scalar('loss', loss)
+    tf.summary.scalar('accuracy', acc)
     for var in tf.trainable_variables():
         tf.summary.histogram(var.op.name, var)
     merged = tf.summary.merge_all()
@@ -65,16 +66,22 @@ with tf.Session() as sess:
         batch_left_arr, batch_right_arr, batch_similar_arr = \
             get_batch_image_array(batch_left, batch_right, batch_similar)
 
-        _, l, accu, summary_str = sess.run([train_step, loss,acc, merged],
+        _, l, train_accu, summary_str = sess.run([train_step, loss,acc, merged],
                                      feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr})
 
-        writer.add_summary(summary_str, i)
-        print("\r#%d, Loss:%f, Train Accuracy: %f" % (i, l, accu))
 
-                # if (i + 1) % FLAGS.validation_step == 0:
-        #     val_distance = sess.run([distance],
-        #                             feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
-        #     logging.info(np.average(val_distance))
+
+        # if (i + 1) % FLAGS.validation_step == 0:
+        # left_dev_arr, right_dev_arr, similar_dev_arr = get_batch_image_array(left_dev, right_dev, similar_dev)
+        valid_acc = sess.run([acc],
+                                    feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
+
+        writer.add_summary(summary_str, i)
+        # print(valid_acc.shape)
+        # print(valid_acc)
+        print("\r#%d, Loss:%f, Train Accuracy: %f, Valid Accuracy: %f" % (i+12000, l, train_accu, valid_acc[0]))
+
+        # logging.info(np.average(val_distance))
 
         if i % 500 == 0 and i != 0:
-            saver.save(sess, "checkpoint/model_%d.ckpt" % i)
+            saver.save(sess, "checkpoint/model_%d.ckpt" % i+12000)
