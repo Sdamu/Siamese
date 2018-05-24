@@ -26,7 +26,7 @@ print(left_output.shape)
 right_output = SIAMESE().siamesenet(right, reuse=True)
 
 # predictions, loss, accuracy = SIAMESE().contrastive_loss(left_output, right_output, label)
-model1, model2, distance, loss = SIAMESE().contrastive_loss(left_output, right_output, label)
+model1, model2, distance, loss, acc = SIAMESE().contrastive_loss(left_output, right_output, label)
 
 global_step = tf.Variable(0, trainable=False)
 
@@ -43,7 +43,7 @@ train_step = tf.train.AdamOptimizer(0.0001).minimize(loss, global_step=global_st
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=20)
-    # saver.restore(sess, 'checkpoint_trained/model_340.ckpt')
+    saver.restore(sess, 'checkpoint/model_12000.ckpt')
 
     # setup tensorboard
     tf.summary.scalar('step', global_step)
@@ -55,6 +55,9 @@ with tf.Session() as sess:
 
     left_dev_arr, right_dev_arr, similar_dev_arr = get_batch_image_array(left_dev, right_dev, similar_dev)
 
+    ###############################
+
+    ###############################
     # train iter
     idx = 0
     for i in range(FLAGS.train_iter):
@@ -62,15 +65,16 @@ with tf.Session() as sess:
         batch_left_arr, batch_right_arr, batch_similar_arr = \
             get_batch_image_array(batch_left, batch_right, batch_similar)
 
-        _, l, summary_str = sess.run([train_step, loss, merged],
+        _, l, accu, summary_str = sess.run([train_step, loss,acc, merged],
                                      feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr})
+
         writer.add_summary(summary_str, i)
-        print("\r#%d - Loss" % i, l)
+        print("\r#%d, Loss:%f, Train Accuracy: %f" % (i, l, accu))
 
-        if (i + 1) % FLAGS.validation_step == 0:
-            val_distance = sess.run([distance],
-                                    feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
-            logging.info(np.average(val_distance))
+                # if (i + 1) % FLAGS.validation_step == 0:
+        #     val_distance = sess.run([distance],
+        #                             feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
+        #     logging.info(np.average(val_distance))
 
-        if i % 10 == 0 and i != 0:
+        if i % 500 == 0 and i != 0:
             saver.save(sess, "checkpoint/model_%d.ckpt" % i)
