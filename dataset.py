@@ -4,13 +4,14 @@ import os
 
 # BASE_PATH = 'same_size/lfw/'
 # BASE_PATH = '/data/data/faces/small/'
-DEV_NUMBER = -2000
+DEV_NUMBER = -10000
 batch_size = 128
 
-negative_pairs_path_file = open('negative_pairs_path.txt', 'r')
-negative_pairs_path_lines = negative_pairs_path_file.readlines()
 positive_pairs_path_file = open('positive_pairs_path.txt', 'r')
 positive_pairs_path_lines = positive_pairs_path_file.readlines()
+negative_pairs_path_file = open('negative_pairs_path.txt', 'r')
+negative_pairs_path_lines = negative_pairs_path_file.readlines()
+
 
 left_image_path_list = []
 right_image_path_list = []
@@ -21,6 +22,19 @@ for line in negative_pairs_path_lines:
     left_image_path_list.append(left_right[0])
     right_image_path_list.append(left_right[1])
     similar_list.append(0)
+
+# negative_left_right = []
+# for line in negative_pairs_path_lines:
+#     negative_left_right.append(line.strip().split(' '))
+#
+# negative_pairs_path_lines =[]
+#
+# np.random.shuffle(negative_left_right)
+# for i in range(len(negative_left_right)):
+#     if i < len(positive_pairs_path_lines):
+#         left_image_path_list.append(negative_left_right[i][0])
+#         right_image_path_list.append(negative_left_right[i][1])
+#         similar_list.append(0)
 
 for line in positive_pairs_path_lines:
     left_right = line.strip().split(' ')

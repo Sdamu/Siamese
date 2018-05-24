@@ -7,28 +7,28 @@ DATA_PATH = os.path.join(BASEPATH, 'AugDataSet')
 # 5 个大的分类
 class_names = os.listdir(DATA_PATH)
 
-# # 产生正样本对
-# ff = open("positive_pairs_path.txt",'wb')
-# for class_name in class_names:
-#     # 每一大类下的 5 个细分类
-#     concrete_class_path = os.path.join(DATA_PATH,class_name)
-#     concrete_class_names = os.listdir(concrete_class_path)
-#     for concrete_class_name in concrete_class_names:
-#         concrete_file_path = os.path.join(concrete_class_path,concrete_class_name)
-#         concrete_file_names = os.listdir(concrete_file_path)
-#         # 生成从 200 个文件中随机选出两个的全部情况，即 C(20)2
-#         combins = [c for c in combinations(range(200), 2)]  # 生成 C(20)2 中情况
-#         for combin in combins:
-#             (pair_a, pair_b) = combin
-#             #print(len(concrete_file_names),pair_a,pair_b)
-#             first = os.path.join(concrete_file_path,concrete_file_names[pair_a])
-#             second = os.path.join(concrete_file_path,concrete_file_names[pair_b])
-#             lines = first + ' '+ second+ '\n'
-#             line = lines.encode(encoding="utf-8")
-#             # print(line)
-#             ff.write(line)
-#
-# ff.close()
+# 产生正样本对
+ff = open("positive_pairs_path.txt",'wb')
+for class_name in class_names:
+    # 每一大类下的 5 个细分类
+    concrete_class_path = os.path.join(DATA_PATH,class_name)
+    concrete_class_names = os.listdir(concrete_class_path)
+    for concrete_class_name in concrete_class_names:
+        concrete_file_path = os.path.join(concrete_class_path,concrete_class_name)
+        concrete_file_names = os.listdir(concrete_file_path)
+        # 生成从 200 个文件中随机选出两个的全部情况，即 C(20)2
+        combins = [c for c in combinations(range(200), 2)]  # 生成 C(20)2 中情况
+        for combin in combins:
+            (pair_a, pair_b) = combin
+            #print(len(concrete_file_names),pair_a,pair_b)
+            first = os.path.join(concrete_file_path,concrete_file_names[pair_a])
+            second = os.path.join(concrete_file_path,concrete_file_names[pair_b])
+            lines = first + ' '+ second+ '\n'
+            line = lines.encode(encoding="utf-8")
+            # print(line)
+            ff.write(line)
+
+ff.close()
 
 # 生成负样本对
 file = open("negative_pairs_path.txt",'wb')

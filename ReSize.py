@@ -3,7 +3,7 @@ import cv2
 from resize_image import *
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_PATH, 'per')
+DATA_PATH = os.path.join(BASE_PATH, 'AugDataset')
 
 objectPath = []
 objectDiffPath = []

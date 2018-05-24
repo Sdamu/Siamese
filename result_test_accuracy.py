@@ -20,8 +20,8 @@ with graph.as_default():
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        saver = tf.train.import_meta_graph('checkpoint/model_990.ckpt.meta')
-        saver.restore(sess, 'checkpoint/model_990.ckpt')
+        saver = tf.train.import_meta_graph('checkpoint/model_12000.ckpt.meta')
+        saver.restore(sess, 'checkpoint/model_12000.ckpt')
 
         left = graph.get_operation_by_name("in/left").outputs[0]
         right = graph.get_operation_by_name("in/right").outputs[0]
