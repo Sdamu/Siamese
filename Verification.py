@@ -3,17 +3,21 @@ import tensorflow as tf
 from dataset import *
 from resize_image import resize_image
 
-image1 = cv2.imread('01.jpg')
-image2 = cv2.imread('02.jpg')
-image1 = resize_image(image1)
-image2 = resize_image(image2)
-image1 = cv2.cvtColor(image1,cv2.COLOR_BGR2RGB)
-image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2RGB)
+image_1 = cv2.imread('01.jpg')
+image_2 = cv2.imread('02.jpg')
 
-left_image = np.asarray(np.asarray(image1),dtype='float32')/255.
-right_image = np.asarray(np.asarray(image2),dtype='float32')/255.
-left_image.resize((1, 72, 72, 3))
-right_image.resize((1, 72, 72, 3))
+def process_image(image1, image2):
+    image1 = resize_image(image1)
+    image2 = resize_image(image2)
+    image1 = cv2.cvtColor(image1,cv2.COLOR_BGR2RGB)
+    image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2RGB)
+
+    left_image = np.asarray(np.asarray(image1),dtype='float32')/255.
+    right_image = np.asarray(np.asarray(image2),dtype='float32')/255.
+    left_image.resize((1, 72, 72, 3))
+    right_image.resize((1, 72, 72, 3))
+
+    return left_image, right_image
 
 graph = tf.Graph()
 with graph.as_default():
@@ -26,6 +30,10 @@ with graph.as_default():
         left = graph.get_operation_by_name("in/left").outputs[0]
         right = graph.get_operation_by_name("in/right").outputs[0]
         distance = graph.get_operation_by_name("output/distance").outputs[0]
+
+        # 加循环判定，进行多张判定
+        left_image, right_image = process_image(image_1, image_2)
+
         output_distance = sess.run([distance], feed_dict={left: left_image, right: right_image})
         if output_distance[0] > 0.5:
             print("Yes")
