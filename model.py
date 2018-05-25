@@ -61,16 +61,20 @@ class SIAMESE(object):
             # add hidden layer1
             hidden_Weights = tf.Variable(tf.truncated_normal([11136, 2048], stddev=0.1))
             hidden_biases = tf.Variable(tf.constant(0.1, shape=[2048]))
-            net = slim.dropout(net,is_training=True, keep_prob=0.5)
+            # net = slim.dropout(net,is_training=True, keep_prob=1.0)
             net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="hidden_layer1")
 
+            # if is_Training:
+            #     keep_prob = 0.7
+            # else:
+            #     keep_prob = 1.0
             with tf.variable_scope("dropout") as scope:
-                net = slim.layers.dropout(net, keep_prob=0.7, scope=scope)
+                net = slim.layers.dropout(net, keep_prob=1.0, scope=scope)
 
             # add hidden layer2
             hidden_Weights = tf.Variable(tf.truncated_normal([2048, 128], stddev=0.1))
             hidden_biases = tf.Variable(tf.constant(0.1, shape=[128]))
-            net = slim.dropout(net, is_training=True, keep_prob=0.5)
+            # net = slim.dropout(net, is_training=True, keep_prob=1.0)
             net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="final_out")
 
         return net
