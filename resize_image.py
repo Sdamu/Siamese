@@ -4,10 +4,16 @@ import numpy as np
 INPUT_SIZE = 72
 
 def resize_image(srcImage):
+    # 最后返回的是灰度图
+
     height, width, channel = srcImage.shape
 
     # 计算图像像素均值
+
     gray_image = cv2.cvtColor(srcImage, cv2.COLOR_BGR2GRAY)
+    # 将图像变为 3 通道的灰度图
+    srcImage = cv2.merge([gray_image, gray_image, gray_image])
+
     mat_mean, mat_stddev = cv2.meanStdDev(gray_image)
     mean = mat_mean[0][0]
     # 建立新图像
@@ -33,7 +39,7 @@ def resize_image(srcImage):
         np_res_temp = np.array(res_temp)
         start_width = 35 - res_width // 2
         end_width = start_width + res_width
-        res[0:72, start_width:end_width] = np_res_temp
+        res[0:INPUT_SIZE, start_width:end_width] = np_res_temp
 
     else: # 高度等于宽度
         res = cv2.resize(srcImage,(INPUT_SIZE,INPUT_SIZE))
