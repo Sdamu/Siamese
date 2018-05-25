@@ -1,11 +1,12 @@
 import numpy as np
 from PIL import Image
 import os
+import cv2
 
 # BASE_PATH = 'same_size/lfw/'
 # BASE_PATH = '/data/data/faces/small/'
-DEV_NUMBER = -10000
-batch_size = 128
+DEV_NUMBER = -256
+batch_size = 256
 
 positive_pairs_path_file = open('positive_pairs_path.txt', 'r')
 positive_pairs_path_lines = positive_pairs_path_file.readlines()
@@ -73,7 +74,11 @@ def vectorize_imgs(img_path_list):
     image_arr_list = []
     for img_path in img_path_list:
         if os.path.exists(img_path):
-            img = Image.open(img_path)
+
+            img = cv2.imread(img_path,0)
+            img = cv2.merge([img,img,img])
+            # img = np.asarray(img)
+            # img = Image.open(img_path)
             img_arr = np.asarray(img, dtype='float32')
             image_arr_list.append(img_arr)
         else:
