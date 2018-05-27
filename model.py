@@ -23,24 +23,24 @@ class SIAMESE(object):
                                                scope=scope, reuse=reuse)
                 # net = slim.layers.max_pool2d(net, [2, 2], padding='SAME')
                 net = tf.nn.max_pool(net, [1, 2, 2, 1], strides=[1,2,2,1], padding='SAME', name="conv_3")
-            # with tf.variable_scope("conv4") as scope:
-            #     net = slim.layers.conv2d(net, 256, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
-            #                                    weights_initializer=slim.xavier_initializer_conv2d(),
-            #                                    scope=scope, reuse=reuse)
-
             with tf.variable_scope("conv4") as scope:
+                net = slim.layers.conv2d(net, 256, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
+                                               weights_initializer=slim.xavier_initializer_conv2d(),
+                                               scope=scope, reuse=reuse)
+
+            with tf.variable_scope("conv5") as scope:
                 net = slim.layers.conv2d(net, 256, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
                                                weights_initializer=slim.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 # net = slim.layers.max_pool2d(net, [2, 2], padding='SAME')
                 net = tf.nn.max_pool(net, [1, 2, 2, 1], strides=[1,2,2,1], padding='SAME', name="conv_4")
                 output_0 = slim.layers.flatten(net)
-            # with tf.variable_scope("conv6") as scope:
-            #     net = slim.layers.conv2d(net, 512, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
-            #                                    weights_initializer=slim.xavier_initializer_conv2d(),
-            #                                    scope=scope, reuse=reuse)
+            with tf.variable_scope("conv6") as scope:
+                net = slim.layers.conv2d(net, 512, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
+                                               weights_initializer=slim.xavier_initializer_conv2d(),
+                                               scope=scope, reuse=reuse)
 
-            with tf.variable_scope("conv5") as scope:
+            with tf.variable_scope("conv7") as scope:
                 net = slim.layers.conv2d(net, 512, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
                                                weights_initializer=slim.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
@@ -48,7 +48,7 @@ class SIAMESE(object):
                 net = tf.nn.max_pool(net, [1, 2, 2, 1], strides=[1,2,2,1], padding='SAME', name="conv_5")
                 output_1 = slim.flatten(net)
 
-            with tf.variable_scope("conv6") as scope:
+            with tf.variable_scope("conv8") as scope:
                 net = slim.layers.conv2d(net, 32, [3, 3], activation_fn=None, padding='SAME',
                                                weights_initializer=slim.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
