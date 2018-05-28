@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 class SIAMESE(object):
-    def siamesenet(self, input, reuse=False):
+    def siamesenet(self, input,is_training, reuse=False):
         with tf.name_scope("model"):
             with tf.variable_scope("conv1") as scope:
                 net = slim.layers.conv2d(input, 32, [7, 7], activation_fn=tf.nn.relu, padding='SAME',
@@ -64,12 +64,12 @@ class SIAMESE(object):
             # net = slim.dropout(net,is_training=True, keep_prob=1.0)
             net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="hidden_layer1")
 
-            # if is_Training:
-            #     keep_prob = 0.7
-            # else:
-            #     keep_prob = 1.0
+            if is_training is not None:
+                keep_prob = 0.7
+            else:
+                keep_prob = 1.0
             with tf.variable_scope("dropout") as scope:
-                net = slim.layers.dropout(net, keep_prob=1.0, scope=scope)
+                net = slim.layers.dropout(net, keep_prob=keep_prob, scope=scope)
 
             # add hidden layer2
             hidden_Weights = tf.Variable(tf.truncated_normal([2048, 128], stddev=0.1))

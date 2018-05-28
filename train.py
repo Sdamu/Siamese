@@ -1,6 +1,7 @@
 from dataset import *
 from model import *
 import logging
+import time
 
 logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
@@ -13,6 +14,10 @@ flags.DEFINE_integer('train_iter', 500001, 'Total training iter')
 flags.DEFINE_integer('validation_step', 1000, 'Total training iter')
 flags.DEFINE_integer('step', 1000, 'Save after ... iteration')
 
+
+with tf.name_scope("is_training"):
+    is_training = tf.placeholder(dtype=tf.bool,shape=[],name='is_training')
+
 with tf.name_scope("in"):
     left = tf.placeholder(tf.float32, [None, 72, 72, 3], name='left')
     right = tf.placeholder(tf.float32, [None, 72, 72, 3], name='right')
@@ -20,10 +25,10 @@ with tf.name_scope("similarity"):
     label = tf.placeholder(tf.int32, [None, 1], name='label')  # 1 if same, 0 if different
     label = tf.to_float(label)
 
-left_output = SIAMESE().siamesenet(left, reuse=False)
+left_output = SIAMESE().siamesenet(left, reuse=False, is_training=is_training)
 print(left_output.shape)
-# 计算右侧输入的时候使用计算左侧时相同的参数
-right_output = SIAMESE().siamesenet(right, reuse=True)
+# 计算右侧输入的时候使用计算左侧时相同的参 数
+right_output = SIAMESE().siamesenet(right, reuse=True, is_training=is_training)
 
 # predictions, loss, accuracy = SIAMESE().contrastive_loss(left_output, right_output, label)
 model1, model2, distance, loss, acc = SIAMESE().contrastive_loss(left_output, right_output, label)
@@ -43,7 +48,7 @@ train_step = tf.train.AdamOptimizer(0.0001).minimize(loss, global_step=global_st
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=20)
-    saver.restore(sess, 'checkpoint/model_12000.ckpt')
+    #saver.restore(sess, 'checkpoint/conv_8_layers_model_6000.ckpt')
 
     # setup tensorboard
     tf.summary.scalar('step', global_step)
@@ -55,33 +60,39 @@ with tf.Session() as sess:
     writer = tf.summary.FileWriter('train.log', sess.graph)
 
     left_dev_arr, right_dev_arr, similar_dev_arr = get_batch_image_array(left_dev, right_dev, similar_dev)
+    is_Training = True
 
     ###############################
 
     ###############################
     # train iter
     idx = 0
-    for i in range(FLAGS.train_iter):
+    for i in range(200001):
         batch_left, batch_right, batch_similar, idx = get_batch_image_path(left_train, right_train, similar_train, idx)
         batch_left_arr, batch_right_arr, batch_similar_arr = \
             get_batch_image_array(batch_left, batch_right, batch_similar)
 
+        time_start = time.time()
         _, l, train_accu, summary_str = sess.run([train_step, loss,acc, merged],
-                                     feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr})
+                                     feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr,
+                                                is_training: is_Training})
 
 
 
         # if (i + 1) % FLAGS.validation_step == 0:
         # left_dev_arr, right_dev_arr, similar_dev_arr = get_batch_image_array(left_dev, right_dev, similar_dev)
-        valid_acc = sess.run([acc],
-                                    feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
 
+        valid_acc = sess.run([acc],
+                                     feed_dict={left: left_dev_arr, right: right_dev_arr, label: similar_dev_arr})
+
+        time_end = time.time()
+        use_time = time_end-time_start
         writer.add_summary(summary_str, i)
         # print(valid_acc.shape)
         # print(valid_acc)
-        print("\r#%d, Loss:%f, Train Accuracy: %f, Valid Accuracy: %f" % (i+12000, l, train_accu, valid_acc[0]))
+        print("\r#%d, Loss:%f, Train Accuracy: %f, Valid Accuracy: %f, Time: %fs" % (i, l, train_accu, valid_acc[0],use_time))
 
         # logging.info(np.average(val_distance))
 
-        if i % 500 == 0 and i != 0:
-            saver.save(sess, "checkpoint/model_%d.ckpt" % i+12000)
+        if (i) % 10 == 0 and i != 0:
+            saver.save(sess, "checkpoint/conv_8_layers_model_%d.ckpt" % (i))
