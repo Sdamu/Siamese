@@ -1,6 +1,14 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
+variables_dict = {
+    "hidden_Weights1": tf.Variable(tf.truncated_normal([11136, 2048], stddev=0.1), name="hidden_Weights1"),
+    "hidden_Weights2": tf.Variable(tf.truncated_normal([2048, 128], stddev=0.1), name="hidden_Weights2"),
+    "hidden_biases1": tf.Variable(tf.constant(0.1, shape=[2048]), name="hidden_biases1"),
+    "hidden_biases2": tf.Variable(tf.constant(0.1, shape=[128]), name="hidden_biases2")
+}
+
+
 class SIAMESE(object):
     def siamesenet(self, input,is_training=None, reuse=False):
         with tf.name_scope("model"):
@@ -58,11 +66,16 @@ class SIAMESE(object):
 
             net = tf.concat([output_0, output_1, output_2], 1,name='concat')
 
+            with tf.variable_scope("local1") as scope:
+                net = tf.nn.relu(tf.matmul(net, variables_dict["hidden_Weights1"])+
+                                 variables_dict["hidden_biases1"], name=scope.name)
+
+
             # add hidden layer1
-            hidden_Weights = tf.Variable(tf.truncated_normal([11136, 2048], stddev=0.1))
-            hidden_biases = tf.Variable(tf.constant(0.1, shape=[2048]))
-            # net = slim.dropout(net,is_training=True, keep_prob=1.0)
-            net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="hidden_layer1")
+            # hidden_Weights = tf.Variable(tf.truncated_normal([11136, 2048], stddev=0.1))
+            # hidden_biases = tf.Variable(tf.constant(0.1, shape=[2048]))
+            # # net = slim.dropout(net,is_training=True, keep_prob=1.0)
+            # net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="hidden_layer1")
 
             if is_training is not None:
                 # 为了方便起见，这里训练和测试时候都取 1.0
@@ -73,15 +86,22 @@ class SIAMESE(object):
                 net = slim.layers.dropout(net, keep_prob=keep_prob, scope=scope)
 
             # add hidden layer2
-            hidden_Weights = tf.Variable(tf.truncated_normal([2048, 128], stddev=0.1))
-            hidden_biases = tf.Variable(tf.constant(0.1, shape=[128]))
+            #hidden_Weights = tf.Variable(tf.truncated_normal([2048, 128], stddev=0.1))
+            #hidden_biases = tf.Variable(tf.constant(0.1, shape=[128]))
             # net = slim.dropout(net, is_training=True, keep_prob=1.0)
-            net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="final_out")
-
+            #net = tf.nn.relu(tf.matmul(net, hidden_Weights) + hidden_biases,name="final_out")
+            with tf.variable_scope("local2") as scope:
+                net = tf.nn.relu(tf.matmul(net, variables_dict["hidden_Weights2"])+
+                                 variables_dict["hidden_biases2"], name=scope.name)
         return net
 
     def contrastive_loss(self, model1, model2, y):
         with tf.name_scope("output"):
+            # 测试使用 #############################
+            w_test = tf.Variable(tf.ones([128,128]), name='w_test')
+            model1_test = tf.matmul(model1,w_test,name='model1_test')
+            model2_test = tf.matmul(model2,w_test, name='model2_test')
+            ######################################
             output_difference = tf.abs(model1 - model2)
             W = tf.Variable(tf.random_normal([128, 1], stddev=0.1), name='W')
             b = tf.Variable(tf.zeros([1, 1]) + 0.1, name='b')
