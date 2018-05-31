@@ -70,7 +70,8 @@ class SIAMESE(object):
 
         # Calculate Accuracy
         with tf.name_scope("accuracy"):
-            accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(y_), y), tf.float32),name="accuracy")
+            y_pred = tf.sigmoid(y_)
+            accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(y_pred), y), tf.float32),name="accuracy")
 
         return model1, model2, y_, loss, accuracy
 
