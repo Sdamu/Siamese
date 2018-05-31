@@ -108,8 +108,11 @@ class SIAMESE(object):
             y_ = tf.nn.sigmoid(tf.matmul(output_difference, W) + b, name='distance')
 
         # CalculateMean loss
+        MIN_NUMBER = 1e-10
         with tf.name_scope("loss"):
-            losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=y_)   # 交叉熵
+            # losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=y_)   # 交叉熵
+            # loss = tf.reduce_mean(losses)
+            losses = -(y * tf.log(y_ + MIN_NUMBER) + (1 - y) * tf.log(1 - y_ + MIN_NUMBER))  # 交叉熵
             loss = tf.reduce_mean(losses)
 
         # Calculate Accuracy
