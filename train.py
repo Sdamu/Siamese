@@ -15,8 +15,8 @@ flags.DEFINE_integer('validation_step', 1000, 'Total training iter')
 flags.DEFINE_integer('step', 1000, 'Save after ... iteration')
 
 
-with tf.name_scope("is_training"):
-    is_training = tf.placeholder(dtype=tf.bool,shape=[],name='is_training')
+# with tf.name_scope("is_training"):
+#     is_training = tf.placeholder(dtype=tf.bool,shape=[],name='is_training')
 
 with tf.name_scope("in"):
     left = tf.placeholder(tf.float32, [None, 72, 72, 3], name='left')
@@ -25,10 +25,10 @@ with tf.name_scope("similarity"):
     label = tf.placeholder(tf.int32, [None, 1], name='label')  # 1 if same, 0 if different
     label = tf.to_float(label)
 
-left_output = SIAMESE().siamesenet(left, reuse=False, is_training=is_training)
+left_output = SIAMESE().siamesenet(left, reuse=False)
 print(left_output.shape)
 # 计算右侧输入的时候使用计算左侧时相同的参 数
-right_output = SIAMESE().siamesenet(right, reuse=True, is_training=is_training)
+right_output = SIAMESE().siamesenet(right, reuse=True)
 
 # predictions, loss, accuracy = SIAMESE().contrastive_loss(left_output, right_output, label)
 model1, model2, distance, loss, acc = SIAMESE().contrastive_loss(left_output, right_output, label)
@@ -48,7 +48,7 @@ train_step = tf.train.AdamOptimizer(0.0001).minimize(loss, global_step=global_st
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=20)
-    #saver.restore(sess, 'checkpoint/conv_8_layers_model_6000.ckpt')
+    # saver.restore(sess, 'checkpoint/new_model_3000.ckpt')
 
     # setup tensorboard
     tf.summary.scalar('step', global_step)
@@ -60,7 +60,7 @@ with tf.Session() as sess:
     writer = tf.summary.FileWriter('train.log', sess.graph)
 
     left_dev_arr, right_dev_arr, similar_dev_arr = get_batch_image_array(left_dev, right_dev, similar_dev)
-    is_Training = True
+    # is_Training = True
 
     ###############################
 
@@ -74,8 +74,7 @@ with tf.Session() as sess:
 
         time_start = time.time()
         _, l, train_accu, summary_str = sess.run([train_step, loss,acc, merged],
-                                     feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr,
-                                                is_training: is_Training})
+                                     feed_dict={left: batch_left_arr, right: batch_right_arr, label: batch_similar_arr})
 
 
 
