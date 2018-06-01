@@ -50,18 +50,12 @@ class SIAMESE(object):
 
     def contrastive_loss(self, model1, model2, y):
         with tf.name_scope("output"):
-            # 测试使用 #############################
-            w_test = tf.Variable(tf.ones([128,128]), name='w_test')
-            model1_test = tf.matmul(model1,w_test,name='model1_test')
-            model2_test = tf.matmul(model2,w_test, name='model2_test')
-            ######################################
             output_difference = tf.abs(model1 - model2)
             W = tf.Variable(tf.random_normal([128, 1], stddev=0.1), name='W')
             b = tf.Variable(tf.zeros([1, 1]) + 0.1, name='b')
             y_ = tf.add(tf.matmul(output_difference, W), b, name='distance')
 
         # CalculateMean loss
-        # MIN_NUMBER = 1e-10
         with tf.name_scope("loss"):
             losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=y_)
             loss = tf.reduce_sum(losses)
