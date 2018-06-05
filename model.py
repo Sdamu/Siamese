@@ -1,4 +1,5 @@
 import tensorflow as tf
+from ResNet import *
 import tensorflow.contrib.slim as slim
 
 variables_dict = {
